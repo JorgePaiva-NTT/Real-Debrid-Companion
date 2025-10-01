@@ -1,0 +1,52 @@
+{
+  "name": "real-debrid-companion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simple Electron dashboard for Real-Debrid",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "electron-store": "^9.0.0",
+    "keytar": "^7.9.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.example.rdcompanion",
+    "productName": "RD Companion",
+    "files": [
+      "main.js",
+      "preload.js",
+      "rd-api.js",
+      "keytar-store.js",
+      "renderer/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JorgePaiva-NTT/Real-Debrid-Companion.git"
+  },
+  "author": "fskjorge@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JorgePaiva-NTT/Real-Debrid-Companion/issues"
+  },
+  "homepage": "https://github.com/JorgePaiva-NTT/Real-Debrid-Companion#readme"
+}
