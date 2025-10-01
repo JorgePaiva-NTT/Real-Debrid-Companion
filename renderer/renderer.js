@@ -39,7 +39,7 @@ async function loadUser() {
     const totalHours = u?.premium / 3600;
     const d = Math.floor(totalHours / 24);
     const h = Math.floor(totalHours % 24);
-    const daysLeftStr = `${d} days ${h} hours`;
+    const daysLeftStr = `${d}d ${h}h`;
 
     const premium = d > 0 ? "Premium" : "Free";
     const email = u?.email || u?.username || "—";
@@ -61,12 +61,27 @@ async function loadUser() {
     subscriptionBox.innerHTML =
       d + h / 24 > 0
         ? `
-    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 8px;">
-      ${daysLeftStr}
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="font-size:3rem;font-weight:bold;line-height:1">${daysLeftStr}</div>
+      <div class="muted">left</div>
+      <button id="buyDays" class="btn primary" style="margin-left:auto;">Add Days</button>
     </div>
-    <div class="muted">left</div>
   `
-        : `<div class="danger"><strong>Subscription:</strong> Expired or none</div>`;
+        : `
+    <div class="danger" style="display:flex; align-items:center; gap:12px;">
+      <strong>Subscription:</strong> Expired or none
+      <button id="buyDays" class="btn primary">Add Days</button>
+    </div>
+  `;
+
+    document.getElementById("buyDays").addEventListener("click", async () => {
+      try {
+        await api.open("https://real-debrid.com/offers-3");
+      } catch (e) {
+        console.error(e);
+        alert("Could not open the subscription page.");
+      }
+    });
   } catch (e) {
     userBox.innerHTML = `<span class="danger">Failed to load user: ${escapeHtml(
       e.message
@@ -140,15 +155,6 @@ async function loadTorrents() {
     )}</span>`;
   }
 }
-
-document.getElementById("buyDays").addEventListener("click", async () => {
-  try {
-    await api.open("https://real-debrid.com/offers-3");
-  } catch (e) {
-    console.error(e);
-    alert("Could not open the subscription page.");
-  }
-});
 
 function fmtBytes(n) {
   if (!n || isNaN(n)) return "—";
