@@ -8,9 +8,11 @@
   "scripts": {
     "dev": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "packager": "electron-packager . RD-Companion --platform=darwin,win32,linux --arch=x64 --out=dist/ --overwrite --icon=assets/icon"
   },
   "dependencies": {
+    "electron-packager": "^17.1.2",
     "electron-store": "^9.0.0",
     "keytar": "^7.9.0",
     "node-fetch": "^3.3.2"
