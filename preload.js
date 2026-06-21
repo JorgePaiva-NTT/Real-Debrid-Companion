@@ -17,6 +17,22 @@ contextBridge.exposeInMainWorld("api", {
   getTorrents: (opts = {}) => ipcRenderer.invoke("rd:torrents", opts),
   getDownloads: (opts = {}) => ipcRenderer.invoke("rd:downloads", opts),
 
+  // Torrent management
+  addMagnet: (magnet) => ipcRenderer.invoke("rd:addMagnet", magnet),
+  torrentInfo: (id) => ipcRenderer.invoke("rd:torrentInfo", id),
+  selectFiles: (id, files) => ipcRenderer.invoke("rd:selectFiles", id, files),
+  deleteTorrent: (id) => ipcRenderer.invoke("rd:deleteTorrent", id),
+
+  // Download management
+  deleteDownload: (id) => ipcRenderer.invoke("rd:deleteDownload", id),
+
+  // Unrestrict
+  unrestrict: (link, opts) => ipcRenderer.invoke("rd:unrestrict", link, opts),
+
+  // Settings
+  getSetting: (key) => ipcRenderer.invoke("settings:get", key),
+  setSetting: (key, value) => ipcRenderer.invoke("settings:set", key, value),
+
   // Generic API call
   rdFetch: (path, params) => ipcRenderer.invoke("rd:fetch", path, params),
 });

@@ -5,166 +5,183 @@
     <meta charset="utf-8">
     <title>RD Companion</title>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self';">
-    <style>
-        :root {
-            color-scheme: light dark;
-        }
-
-        body {
-            margin: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-            background: canvas;
-            color: canvastext;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid color-mix(in srgb, canvastext 12%, transparent);
-        }
-
-        .btn {
-            border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
-            background: color-mix(in srgb, canvas 85%, canvastext 5%);
-            padding: 8px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn.primary {
-            background: color-mix(in srgb, royalblue 35%, canvas 65%);
-            color: white;
-            border-color: transparent;
-        }
-
-        .grid {
-            display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(12, 1fr);
-            padding: 16px;
-        }
-
-        .card {
-            grid-column: span 6;
-            background: color-mix(in srgb, canvas 90%, canvastext 5%);
-            border: 1px solid color-mix(in srgb, canvastext 12%, transparent);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 2px 24px color-mix(in srgb, canvastext 10%, transparent);
-        }
-
-        .card.full {
-            grid-column: 1 / -1;
-        }
-
-        .muted {
-            opacity: 0.75;
-        }
-
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
-            background: color-mix(in srgb, canvas 85%, canvastext 5%);
-            color: inherit;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 8px 6px;
-            border-bottom: 1px solid color-mix(in srgb, canvastext 12%, transparent);
-        }
-
-        .row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .pill {
-            padding: 2px 8px;
-            border-radius: 999px;
-            border: 1px solid color-mix(in srgb, canvastext 18%, transparent);
-            font-size: 12px;
-        }
-
-        .danger {
-            color: crimson;
-        }
-
-        .ok {
-            color: seagreen;
-        }
-
-        .ghost {
-            opacity: .6
-        }
-
-        form.dialog {
-            min-width: 520px;
-        }
-
-        .btn-row {
-            justify-content: flex-end;
-            margin-top: 12px;
-        }
-    </style>
+        content="default-src 'self'; img-src 'self' https: data:; style-src 'self'; script-src 'self';">
+    <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
     <header>
         <h3>RD Companion</h3>
         <div class="row">
-            <button id="refresh" type="button" class="btn">Refresh</button>
-            <button id="setToken" type="button" class="btn primary">Set/Update Token</button>
-            <button id="clearToken" type="button" class="btn">Clear Token</button>
+            <button id="refresh" type="button" class="btn">↻ Refresh</button>
+            <button id="setToken" type="button" class="btn primary">Set Token</button>
+            <button id="clearToken" type="button" class="btn danger">Clear</button>
         </div>
     </header>
 
-    <section class="grid">
-        <div class="card">
-            <h4>Account</h4>
-            <div id="userBox" class="muted">Loading…</div>
-        </div>
+    <!-- Navigation Tabs -->
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="unrestrict">Unrestrict</button>
+        <button class="tab-btn" data-tab="torrents">Torrents</button>
+        <button class="tab-btn" data-tab="downloads">Downloads</button>
+        <button class="tab-btn" data-tab="settings">Settings</button>
+    </nav>
 
-        <div class="card">
-            <h4>Subscription</h4>
-            <div id="subscriptionBox" class="muted">Loading…</div>
-        </div>
+    <!-- Toast container for notifications -->
+    <div class="toast-container" id="toastContainer"></div>
 
-        <div class="card full">
-            <h4>Recent Downloads</h4>
-            <div id="downloadsBox" class="muted">Loading…</div>
-        </div>
+    <!-- ═══ Dashboard Tab ═══ -->
+    <section class="tab-panel active" id="panel-dashboard">
+        <div class="grid">
+            <div class="card">
+                <h4>Account</h4>
+                <div id="userBox" class="muted">Loading…</div>
+            </div>
 
-        <div class="card full">
-            <h4>Torrents</h4>
-            <div id="torrentsBox" class="muted">Loading…</div>
+            <div class="card">
+                <h4>Subscription</h4>
+                <div id="subscriptionBox" class="muted">Loading…</div>
+            </div>
+
+            <div class="card full" id="failedCard" style="display:none;">
+                <h4>Failed Downloads</h4>
+                <div id="failedBox"></div>
+                <div style="margin-top:12px;">
+                    <button id="cancelAllFailed" class="btn danger">Remove All Failed</button>
+                </div>
+            </div>
+
+            <div class="card full" id="stuckCard" style="display:none;">
+                <h4>⚠️ Stuck Downloads Detected</h4>
+                <p class="muted">These torrents appear stuck (downloading but no progress for 5+ minutes). They may be degrading your streaming experience.</p>
+                <div id="stuckBox"></div>
+                <div style="margin-top:12px;">
+                    <button id="cancelAllStuck" class="btn danger">Cancel All Stuck</button>
+                </div>
+            </div>
+
+            <div class="card full">
+                <h4>Latest Torrents</h4>
+                <div id="dashTorrentsBox" class="muted">Loading…</div>
+            </div>
         </div>
     </section>
 
-    <!-- Token modal (simple prompt-style) -->
+    <!-- ═══ Unrestrict Tab ═══ -->
+    <section class="tab-panel" id="panel-unrestrict">
+        <div class="grid">
+            <div class="card full">
+                <h4>Unrestrict a Link</h4>
+                <p class="muted">Paste a supported hoster link to generate a direct download link.</p>
+                <div class="row" style="margin-top:12px;">
+                    <input id="unrestrictInput" type="url" placeholder="https://example.com/file/abc123">
+                    <button id="unrestrictBtn" class="btn primary">Unrestrict</button>
+                </div>
+                <div id="unrestrictResult" style="margin-top:12px;"></div>
+            </div>
+
+            <div class="card full">
+                <h4>Add Magnet Link</h4>
+                <p class="muted">Paste a magnet URI to add a torrent to your Real-Debrid cloud.</p>
+                <div class="row" style="margin-top:12px;">
+                    <input id="magnetInput" type="text" placeholder="magnet:?xt=urn:btih:...">
+                    <button id="magnetBtn" class="btn primary">Add Torrent</button>
+                </div>
+                <div id="magnetResult" style="margin-top:12px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Torrents Tab ═══ -->
+    <section class="tab-panel" id="panel-torrents">
+        <div class="card full">
+            <h4>Torrents</h4>
+            <div class="search-row">
+                <input id="torrentSearch" type="text" placeholder="Filter torrents…">
+            </div>
+            <div id="torrentsBox" class="muted">Loading…</div>
+            <div class="pagination" id="torrentsPagination"></div>
+        </div>
+    </section>
+
+    <!-- ═══ Downloads Tab ═══ -->
+    <section class="tab-panel" id="panel-downloads">
+        <div class="card full">
+            <h4>Recent Downloads</h4>
+            <div class="search-row">
+                <input id="downloadSearch" type="text" placeholder="Filter downloads…">
+            </div>
+            <div id="downloadsBox" class="muted">Loading…</div>
+            <div class="pagination" id="downloadsPagination"></div>
+        </div>
+    </section>
+
+    <!-- ═══ Settings Tab ═══ -->
+    <section class="tab-panel" id="panel-settings">
+        <div class="card full">
+            <h4>Preferences</h4>
+
+            <div class="settings-group">
+                <div class="setting-row">
+                    <div>
+                        <label>Auto-refresh interval</label>
+                        <div class="desc">Refresh torrents & downloads automatically (seconds, 0 = off)</div>
+                    </div>
+                    <input id="settingRefreshInterval" type="number" min="0" max="600" value="60"
+                        style="width:80px;">
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <label>Minimize to tray</label>
+                        <div class="desc">Keep running in background when window is closed</div>
+                    </div>
+                    <label class="toggle">
+                        <input id="settingMinimizeToTray" type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <label>Clipboard monitoring</label>
+                        <div class="desc">Automatically unrestrict supported links copied to clipboard</div>
+                    </div>
+                    <label class="toggle">
+                        <input id="settingClipboard" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Token modal -->
     <dialog id="tokenModal">
-        <form method="dialog" class="dialog">
+        <form method="dialog">
             <h3>Enter Real-Debrid Private Token</h3>
-            <p class="muted">Your token is stored securely via your OS keychain (Keytar). It won’t be written to disk in
-                plain text.</p>
+            <p class="muted">Your token is stored securely via your OS keychain. It won't be written to disk in plain
+                text.</p>
             <input id="tokenInput" type="password" placeholder="Paste your token…" autocomplete="off">
-            <div class="row btn-row">
-                <button type="button" value="cancel" class="btn">Cancel</button>
+            <div class="btn-row">
+                <button type="button" value="cancel" class="btn"
+                    onclick="this.closest('dialog').close('cancel')">Cancel</button>
                 <button type="submit" value="ok" class="btn primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- File select modal (for torrent files) -->
+    <dialog id="fileSelectModal">
+        <form method="dialog">
+            <h3>Select Files to Download</h3>
+            <p class="muted">Choose which files from the torrent to download.</p>
+            <div id="fileSelectList" style="max-height:300px;overflow-y:auto;margin:12px 0;"></div>
+            <div class="btn-row">
+                <button type="button" class="btn"
+                    onclick="this.closest('dialog').close('cancel')">Cancel</button>
+                <button type="submit" value="ok" class="btn primary">Download Selected</button>
             </div>
         </form>
     </dialog>

@@ -8,11 +8,9 @@
   "scripts": {
     "dev": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "packager": "electron-packager . RD-Companion --platform=darwin,win32,linux --arch=x64 --out=dist/ --overwrite --icon=assets/icon"
+    "dist": "electron-builder"
   },
   "dependencies": {
-    "electron-packager": "^17.1.2",
     "electron-store": "^9.0.0",
     "keytar": "^7.9.0",
     "node-fetch": "^3.3.2"
@@ -29,7 +27,8 @@
       "preload.js",
       "rd-api.js",
       "keytar-store.js",
-      "renderer/**/*"
+      "renderer/**/*",
+      "assets/**/*"
     ],
     "mac": {
       "category": "public.app-category.utilities"
