@@ -644,10 +644,105 @@ function truncate(str, len) {
   return str.length > len ? str.slice(0, len - 1) + "…" : str;
 }
 
+// ─── Traffic Chart (Chart.js) ───────────────────────────────────────────────
+let trafficChartInstance = null;
+
+async function loadTrafficChart() {
+  const canvas = document.getElementById("trafficChart");
+  const summary = document.getElementById("trafficSummary");
+  if (!canvas) return;
+
+  try {
+    // /traffic/details returns: { "YYYY-MM-DD": { host: {...}, bytes: total }, ... }
+    const details = await api.rdFetch("/traffic/details");
+    const dailyMap = {};
+
+    for (const [date, entry] of Object.entries(details || {})) {
+      const dayTotal = entry?.bytes || 0;
+      if (dayTotal > 0) {
+        dailyMap[date] = dayTotal;
+      }
+    }
+
+    const sorted = Object.entries(dailyMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-30);
+
+    if (!sorted.length) {
+      summary.textContent = "No traffic data available.";
+      return;
+    }
+
+    const labels = sorted.map(([d]) => {
+      const parts = d.split("-");
+      return `${parts[2]}/${parts[1]}`; // DD/MM
+    });
+    const values = sorted.map(([, v]) => v);
+    const totalBytes = values.reduce((a, b) => a + b, 0);
+
+    summary.textContent = `Total: ${fmtBytes(totalBytes)} across ${sorted.length} days`;
+
+    // Destroy previous instance if refreshing
+    if (trafficChartInstance) {
+      trafficChartInstance.destroy();
+    }
+
+    const ctx = canvas.getContext("2d");
+    trafficChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Traffic",
+          data: values,
+          backgroundColor: "rgba(65, 105, 225, 0.7)",
+          borderColor: "royalblue",
+          borderWidth: 1,
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (item) => fmtBytes(item.raw),
+            },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (v) => fmtBytes(v),
+              maxTicksLimit: 5,
+            },
+            grid: { color: "rgba(128,128,128,0.15)" },
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 30,
+              autoSkip: true,
+              maxTicksLimit: 15,
+              font: { size: 11 },
+            },
+            grid: { display: false },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    summary.textContent = `Failed to load traffic: ${e.message}`;
+  }
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function refreshAll() {
   await ensureToken();
-  await Promise.all([loadUser(), refreshTorrentsAll(), loadDownloads()]);
+  await Promise.all([loadUser(), refreshTorrentsAll(), loadDownloads(), loadTrafficChart()]);
 }
 
 document.getElementById("refresh").addEventListener("click", refreshAll);

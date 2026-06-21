@@ -11,6 +11,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "electron-store": "^9.0.0",
     "keytar": "^7.9.0",
     "node-fetch": "^3.3.2"
@@ -28,7 +29,8 @@
       "rd-api.js",
       "keytar-store.js",
       "renderer/**/*",
-      "assets/**/*"
+      "assets/**/*",
+      "node_modules/chart.js/dist/chart.umd.js"
     ],
     "mac": {
       "category": "public.app-category.utilities"

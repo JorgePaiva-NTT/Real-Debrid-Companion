@@ -53,12 +53,20 @@
             </div>
 
             <div class="card full" id="stuckCard" style="display:none;">
-                <h4>⚠️ Stuck Downloads Detected</h4>
+                <h4>Stuck Downloads Detected</h4>
                 <p class="muted">These torrents appear stuck (downloading but no progress for 5+ minutes). They may be degrading your streaming experience.</p>
                 <div id="stuckBox"></div>
                 <div style="margin-top:12px;">
                     <button id="cancelAllStuck" class="btn danger">Cancel All Stuck</button>
                 </div>
+            </div>
+
+            <div class="card full">
+                <h4>Traffic Usage (Last 30 Days)</h4>
+                <div style="position:relative;height:220px;">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+                <div id="trafficSummary" class="muted" style="margin-top:8px;"></div>
             </div>
 
             <div class="card full">
@@ -186,6 +194,7 @@
         </form>
     </dialog>
 
+    <script src="../node_modules/chart.js/dist/chart.umd.js"></script>
     <script src="./renderer.js" defer></script>
 </body>
 
