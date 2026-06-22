@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getUser, getTrafficDetails, getTorrents } from "../lib/rd";
 import { fmtBytes, fmtDate, truncate } from "../lib/utils";
 import TrafficChart from "./TrafficChart";
+import ServiceStatus from "./ServiceStatus";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -76,6 +77,11 @@ export default function Dashboard() {
         ) : (
           <div className="skeleton" style={{ width: "60%", height: 40 }} />
         )}
+      </div>
+
+      {/* Service Status */}
+      <div className="card">
+        <ServiceStatus />
       </div>
 
       {/* Traffic Chart */}
