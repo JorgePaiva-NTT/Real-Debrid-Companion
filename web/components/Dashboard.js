@@ -38,7 +38,7 @@ export default function Dashboard() {
   return (
     <div className="grid">
       {/* Service Status */}
-      <div className="card">
+      <div className="card full">
         <ServiceStatus />
       </div>
 

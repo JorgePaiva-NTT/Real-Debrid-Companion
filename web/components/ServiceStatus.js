@@ -43,85 +43,88 @@ export default function ServiceStatus() {
     );
   }
 
-  function ServiceRow({ service }) {
+  function ServiceTile({ service }) {
     if (!service) return null;
     const isStreamServers = service.working != null;
 
     return (
       <div
         style={{
+          flex: "1 1 0",
+          minWidth: 140,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "space-between",
-          padding: "10px 0",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          gap: 6,
+          padding: "14px 10px",
+          borderRadius: 10,
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <StatusDot ok={service.ok} />
-          <div>
-            <span style={{ fontWeight: 500 }}>{service.name}</span>
-            {isStreamServers && (
-              <div className="muted" style={{ fontSize: "0.75rem" }}>
-                {service.working}/{service.total} servers ({service.rate}%)
-              </div>
-            )}
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {service.latency != null && (
-            <span className="muted" style={{ fontSize: "0.85rem" }}>
-              {isStreamServers ? `avg ${service.latency}ms` : `${service.latency}ms`}
-            </span>
-          )}
-          <span
-            className={`pill ${service.ok ? "premium" : "danger-pill"}`}
-            style={{ fontSize: "0.75rem", padding: "2px 8px" }}
-          >
-            {service.ok ? (isStreamServers ? `${service.rate}%` : "Online") : "Down"}
+        <StatusDot ok={service.ok} />
+        <span style={{ fontWeight: 600, fontSize: "0.85rem", textAlign: "center" }}>
+          {service.name}
+        </span>
+        {isStreamServers ? (
+          <span className="muted" style={{ fontSize: "0.75rem" }}>
+            {service.working}/{service.total} ({service.rate}%)
           </span>
-        </div>
+        ) : (
+          service.latency != null && (
+            <span className="muted" style={{ fontSize: "0.75rem" }}>
+              {service.latency}ms
+            </span>
+          )
+        )}
+        <span
+          className={`pill ${service.ok ? "premium" : "danger-pill"}`}
+          style={{ fontSize: "0.7rem", padding: "2px 8px", marginTop: 2 }}
+        >
+          {service.ok ? (isStreamServers ? `${service.rate}%` : "Online") : "Down"}
+        </span>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h4 style={{ margin: 0 }}>🟢 Service Status</h4>
-        <button
-          onClick={fetchStatus}
-          disabled={loading}
-          style={{
-            background: "none",
-            border: "1px solid rgba(255,255,255,0.2)",
-            color: "inherit",
-            padding: "4px 10px",
-            borderRadius: 6,
-            cursor: loading ? "not-allowed" : "pointer",
-            fontSize: "0.8rem",
-            opacity: loading ? 0.5 : 1,
-          }}
-        >
-          {loading ? "Checking…" : "Refresh"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {lastChecked && (
+            <span className="muted" style={{ fontSize: "0.75rem" }}>
+              {lastChecked}
+            </span>
+          )}
+          <button
+            onClick={fetchStatus}
+            disabled={loading}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.2)",
+              color: "inherit",
+              padding: "4px 10px",
+              borderRadius: 6,
+              cursor: loading ? "not-allowed" : "pointer",
+              fontSize: "0.8rem",
+              opacity: loading ? 0.5 : 1,
+            }}
+          >
+            {loading ? "Checking…" : "Refresh"}
+          </button>
+        </div>
       </div>
 
       {!status ? (
         <div className="skeleton" style={{ width: "100%", height: 80 }} />
       ) : (
-        <div>
-          <ServiceRow service={status.realDebrid} />
-          <ServiceRow service={status.streamServers} />
-          <ServiceRow service={status.torrentio} />
-          <ServiceRow service={status.jackettio} />
-          <ServiceRow service={status.comet} />
-        </div>
-      )}
-
-      {lastChecked && (
-        <div className="muted" style={{ fontSize: "0.75rem", marginTop: 8, textAlign: "right" }}>
-          Last checked: {lastChecked}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <ServiceTile service={status.realDebrid} />
+          <ServiceTile service={status.streamServers} />
+          <ServiceTile service={status.torrentio} />
+          <ServiceTile service={status.jackettio} />
+          <ServiceTile service={status.comet} />
         </div>
       )}
     </div>
