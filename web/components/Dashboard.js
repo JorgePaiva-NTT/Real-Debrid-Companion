@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getUser, getTrafficDetails, getTorrents } from "../lib/rd";
+import { getTrafficDetails, getTorrents } from "../lib/rd";
 import { fmtBytes, fmtDate, truncate } from "../lib/utils";
 import TrafficChart from "./TrafficChart";
 import ServiceStatus from "./ServiceStatus";
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
   const [torrents, setTorrents] = useState([]);
   const [traffic, setTraffic] = useState(null);
   const [error, setError] = useState("");
@@ -20,12 +19,10 @@ export default function Dashboard() {
 
   async function loadData() {
     try {
-      const [u, t, tr] = await Promise.all([
-        getUser(),
+      const [t, tr] = await Promise.all([
         getTorrents({ limit: 20, page: 1 }),
         getTrafficDetails(),
       ]);
-      setUser(u);
       setTorrents(Array.isArray(t) ? t : []);
       setTraffic(tr);
       setError("");
@@ -38,47 +35,8 @@ export default function Dashboard() {
     return <div className="card full"><span className="danger">Error: {error}</span></div>;
   }
 
-  const totalHours = (user?.premium || 0) / 3600;
-  const days = Math.floor(totalHours / 24);
-  const hours = Math.floor(totalHours % 24);
-
   return (
     <div className="grid">
-      {/* Account Card */}
-      <div className="card">
-        <h4>Account</h4>
-        {user ? (
-          <>
-            <div className="row">
-              <span className={`pill ${days > 0 ? "premium" : ""}`}>
-                {days > 0 ? "Premium" : "Free"}
-              </span>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <div><strong>User:</strong> {user.email || user.username || "—"}</div>
-              <div><strong>Expires:</strong> {user.expiration || "—"}</div>
-            </div>
-          </>
-        ) : (
-          <div className="skeleton" style={{ width: "80%", height: 60 }} />
-        )}
-      </div>
-
-      {/* Subscription Card */}
-      <div className="card">
-        <h4>Subscription</h4>
-        {user ? (
-          <div className="row">
-            <div style={{ fontSize: "2.2rem", fontWeight: "bold" }}>
-              {days}d {hours}h
-            </div>
-            <span className="muted">remaining</span>
-          </div>
-        ) : (
-          <div className="skeleton" style={{ width: "60%", height: 40 }} />
-        )}
-      </div>
-
       {/* Service Status */}
       <div className="card">
         <ServiceStatus />
@@ -86,7 +44,7 @@ export default function Dashboard() {
 
       {/* Traffic Chart */}
       <div className="card full">
-        <h4>📊 Traffic Usage (Last 30 Days)</h4>
+        <h4>Traffic Usage (Last 30 Days)</h4>
         <TrafficChart data={traffic} />
       </div>
 
